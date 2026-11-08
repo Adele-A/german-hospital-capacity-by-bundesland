@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+# Binary / data files Git should not touch
+*.xlsx binary
+*.xls binary
+*.duckdb binary
+*.png binary
+*.topojson binary

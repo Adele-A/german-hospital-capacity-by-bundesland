@@ -1,0 +1,40 @@
+[project]
+name = "german-hospital-capacity-by-bundesland"
+version = "0.1.0"
+description = "Hospital capacity and utilisation across the 16 German federal states (Destatis), reproducible ETL + BI."
+readme = "README.md"
+requires-python = ">=3.14"
+license = { text = "MIT" }
+authors = [{ name = "Adele Amanzhol" }]
+dependencies = [
+    "pandas",
+    "openpyxl",
+    "requests",
+    "duckdb",
+    "pyyaml",
+    "pandera",
+    "plotly",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["etl"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "C4"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
