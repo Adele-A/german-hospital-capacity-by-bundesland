@@ -1,0 +1,18 @@
+ags_code,iso_3166_2,name_de,name_en,is_total,aliases
+01,DE-SH,Schleswig-Holstein,Schleswig-Holstein,false,
+02,DE-HH,Hamburg,Hamburg,false,Freie und Hansestadt Hamburg|Hamburg (Freie und Hansestadt)
+03,DE-NI,Niedersachsen,Lower Saxony,false,
+04,DE-HB,Bremen,Bremen,false,Freie Hansestadt Bremen|Bremen (Freie Hansestadt)
+05,DE-NW,Nordrhein-Westfalen,North Rhine-Westphalia,false,Nordrhein-Westfalen (NRW)|NRW
+06,DE-HE,Hessen,Hesse,false,
+07,DE-RP,Rheinland-Pfalz,Rhineland-Palatinate,false,
+08,DE-BW,Baden-Württemberg,Baden-Württemberg,false,Baden-Wuerttemberg|Baden-Wuerttemberg (Land)|Baden-Württemberg (Land)
+09,DE-BY,Bayern,Bavaria,false,Freistaat Bayern
+10,DE-SL,Saarland,Saarland,false,
+11,DE-BE,Berlin,Berlin,false,
+12,DE-BB,Brandenburg,Brandenburg,false,
+13,DE-MV,Mecklenburg-Vorpommern,Mecklenburg-Western Pomerania,false,Mecklenburg-Vorpommern (MV)
+14,DE-SN,Sachsen,Saxony,false,Freistaat Sachsen
+15,DE-ST,Sachsen-Anhalt,Saxony-Anhalt,false,
+16,DE-TH,Thüringen,Thuringia,false,Thueringen|Freistaat Thüringen|Freistaat Thueringen
+DG,,Deutschland,Germany,true,Insgesamt|Deutschland insgesamt|Bundesgebiet|Bundesrepublik Deutschland|Germany total|Total
