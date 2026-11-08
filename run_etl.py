@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 
-from etl import config, extract, paths, transform, validate, warehouse
+from etl import config, export, extract, paths, transform, validate, warehouse
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -33,6 +33,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--force-download",
         action="store_true",
         help="Re-download raw files even if present.",
+    )
+    parser.add_argument(
+        "--skip-geo",
+        action="store_true",
+        help="Skip geo/figures/HTML (requires the optional '[geo]' extra).",
     )
     return parser.parse_args(argv)
 
@@ -76,6 +81,28 @@ def stage_validate() -> None:
     print(f"[validate] {passed}/{len(result.checks)} checks passed -> reports/validation_report.md")
 
 
+def stage_export(*, skip_geo: bool = False) -> None:
+    """Stage 5 — star-schema CSVs, geo TopoJSON, static figures, HTML preview."""
+    con = warehouse.connect()
+    try:
+        counts = export.export_csvs(con)
+        for name, n in counts.items():
+            print(f"[export] dashboard/data/{name}.csv: {n} rows")
+        if not skip_geo:
+            from etl import figures, geo, preview
+
+            g = geo.build_geo()
+            print(f"[export] dashboard/geo/bundeslaender.topojson: {g['features']} features")
+            figs = figures.build_figures(con)
+            print(f"[export] reports/figures: {len(figs)} PNGs")
+            html = preview.build_html(con)
+            print(f"[export] {html}")
+        else:
+            print("[export] --skip-geo: geo TopoJSON, figures and HTML preview skipped")
+    finally:
+        con.close()
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     paths.ensure_dirs()
@@ -83,7 +110,7 @@ def main(argv: list[str] | None = None) -> int:
     stage_extract(skip_download=args.skip_download, force_download=args.force_download)
     stage_transform()
     stage_validate()
-    # Later stages (export) are wired in as the project progresses.
+    stage_export(skip_geo=args.skip_geo)
     return 0
 
 

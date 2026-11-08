@@ -1,0 +1,9 @@
+{
+  "source": "BKG — Bundesamt für Kartographie und Geodäsie, VG2500",
+  "layer": "VG2500_LAN (GF=9, land area)",
+  "url": "https://daten.gdz.bkg.bund.de/produkte/vg/vg2500/aktuell/vg2500_12-31.utm32s.shape.zip",
+  "sha256": "2782060b2e518fc60cce2f8b1201334cd783d3225e6c7552655aa0b33b056d05",
+  "license": "Datenlizenz Deutschland – Namensnennung – Version 2.0 (BKG, VG2500)",
+  "crs_output": "EPSG:4326",
+  "simplify_tolerance_m": 500
+}

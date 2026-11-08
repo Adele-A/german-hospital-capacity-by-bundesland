@@ -1,0 +1,18 @@
+ags_code,iso_3166_2,name_de,name_en,is_total
+01,DE-SH,Schleswig-Holstein,Schleswig-Holstein,False
+02,DE-HH,Hamburg,Hamburg,False
+03,DE-NI,Niedersachsen,Lower Saxony,False
+04,DE-HB,Bremen,Bremen,False
+05,DE-NW,Nordrhein-Westfalen,North Rhine-Westphalia,False
+06,DE-HE,Hessen,Hesse,False
+07,DE-RP,Rheinland-Pfalz,Rhineland-Palatinate,False
+08,DE-BW,Baden-Württemberg,Baden-Württemberg,False
+09,DE-BY,Bayern,Bavaria,False
+10,DE-SL,Saarland,Saarland,False
+11,DE-BE,Berlin,Berlin,False
+12,DE-BB,Brandenburg,Brandenburg,False
+13,DE-MV,Mecklenburg-Vorpommern,Mecklenburg-Western Pomerania,False
+14,DE-SN,Sachsen,Saxony,False
+15,DE-ST,Sachsen-Anhalt,Saxony-Anhalt,False
+16,DE-TH,Thüringen,Thuringia,False
+DG,,Deutschland,Germany,True

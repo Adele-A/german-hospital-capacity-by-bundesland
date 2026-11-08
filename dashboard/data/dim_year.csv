@@ -1,0 +1,4 @@
+year,is_anchor,covid_affected,population_census_basis
+2022,True,True,Zensus 2022
+2023,True,False,Zensus 2022
+2024,True,False,Zensus 2022
