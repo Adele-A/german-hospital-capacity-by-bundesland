@@ -12,9 +12,7 @@ from __future__ import annotations
 
 import argparse
 
-from etl import paths
-
-DEFAULT_YEARS = [2019, 2022, 2023]
+from etl import config, extract, paths, warehouse
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -23,27 +21,45 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--years",
         type=int,
         nargs="+",
-        default=DEFAULT_YEARS,
-        help="Reporting years to include (default: %(default)s).",
+        default=config.years(),
+        help="By-Land reporting years to include (default from config/sources.yaml).",
     )
     parser.add_argument(
         "--skip-download",
         action="store_true",
         help="Reuse raw files already in data/raw instead of downloading.",
     )
+    parser.add_argument(
+        "--force-download",
+        action="store_true",
+        help="Re-download raw files even if present.",
+    )
     return parser.parse_args(argv)
+
+
+def stage_extract(*, skip_download: bool, force_download: bool) -> None:
+    """Stage 2 — download reports (idempotent) and load the raw parsed layer into DuckDB."""
+    if skip_download:
+        print("[extract] --skip-download: reusing data/raw and refreshing MANIFEST")
+    manifest = extract.download_reports(force=force_download)
+    for m in manifest:
+        print(f"[extract] {m['action']:>10}  {m['filename']}  ({m['size_bytes'] // 1024} KiB)")
+
+    raw = extract.extract_all()
+    con = warehouse.connect()
+    try:
+        n = warehouse.write_table(con, "raw_source_long", raw)
+    finally:
+        con.close()
+    print(f"[extract] raw_source_long: {n} rows loaded into {paths.DUCKDB_PATH.name}")
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     paths.ensure_dirs()
-    print(f"[run_etl] years={args.years} skip_download={args.skip_download}")
-    # Stages wired in as the project progresses:
-    #   1. extract   -> data/raw + MANIFEST.json
-    #   2. transform -> DuckDB raw/staging/mart
-    #   3. validate  -> reports/validation_report.md
-    #   4. export    -> dashboard/data + reports
-    print("[run_etl] scaffolding only — stages are added incrementally (see docs/PLAN.md).")
+    print(f"[run_etl] by-Land years={args.years}")
+    stage_extract(skip_download=args.skip_download, force_download=args.force_download)
+    # Later stages (transform -> validate -> export) are wired in as the project progresses.
     return 0
 
 

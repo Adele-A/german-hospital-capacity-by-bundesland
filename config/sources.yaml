@@ -1,0 +1,119 @@
+# Source configuration — verified live on 2026-11-08 (see docs/PLAN.md, docs/decisions.md).
+# Tokenless path: the pipeline runs with NO token. Primary data come from the Destatis
+# "Statistischer Bericht – Grunddaten der Krankenhäuser" (statistic 23111) XLSX reports.
+#
+# Key finding: in the 2023+ reports, sheet `csv-23111-01` is a tidy long-format TIME SERIES
+# (1991..reporting year) x 17 Gebiete (16 Länder + Deutschland), already machine-readable.
+# The latest full report therefore yields every Bundesland for every year in one sheet, so
+# 2019/2022/2024 come from a single file. Each value row is keyed by (Wertmerkmal, Masseinheit).
+
+license:
+  name: "Datenlizenz Deutschland – Namensnennung – Version 2.0"
+  url: "https://www.govdata.de/dl-de/by-2-0"
+  attribution: "Statistisches Bundesamt (Destatis)"
+
+statistic:
+  code: "23111"
+  name_de: "Grunddaten der Krankenhäuser"
+  name_en: "Basic data of hospitals"
+
+# By-Land analytical years. IMPORTANT: csv-23111-01 holds the 16 Länder only for the report's
+# own reporting year; earlier years in the sheet are Deutschland-only. So each report supplies
+# one by-Land year, and the tokenless by-Land set is exactly the downloaded report years below.
+# (A pre-pandemic 2019 by Land needs the archived report or a GENESIS token — see PLAN §6.)
+years: [2022, 2023, 2024]
+anchor_years: [2022, 2023, 2024]
+
+# The Deutschland (DG) national time series is pulled from the primary report for context
+# (covers the pandemic dip and the pre-COVID 2019 baseline at the national level).
+germany_series:
+  from_report: "2024"
+  year_min: 2000
+
+# Downloaded reports. Each report contributes the 16 Länder for its own reporting year.
+# `role: primary` additionally provides the Deutschland national series; `role: crosscheck`
+# reports are used in validation (Deutschland value agreement across report vintages).
+reports:
+  "2024":
+    role: primary
+    report_year: 2024
+    series_sheet: "csv-23111-01"
+    filename: "grunddaten_krankenhaeuser_2024.xlsx"
+    url: "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Gesundheit/Krankenhauser/Publikationen/Downloads-Krankenhaeuser/statistischer-bericht-grunddaten-krankenhaeuser-2120611247005.xlsx?__blob=publicationFile"
+  "2023":
+    role: crosscheck
+    report_year: 2023
+    series_sheet: "csv-23111-01"
+    filename: "grunddaten_krankenhaeuser_2023.xlsx"
+    url: "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Gesundheit/Krankenhauser/Publikationen/Downloads-Krankenhaeuser/statistischer-bericht-grunddaten-krankenhaeuser-2120611237005.xlsx?__blob=publicationFile"
+  "2022":
+    role: crosscheck
+    report_year: 2022
+    series_sheet: "csv-23111-01"
+    filename: "grunddaten_krankenhaeuser_2022.xlsx"
+    url: "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Gesundheit/Krankenhauser/Publikationen/Downloads-Krankenhaeuser/statistischer-bericht-grunddaten-krankenhaeuser-2120611227005.xlsx?__blob=publicationFile"
+
+# Source indicators as they appear in csv-23111-01, keyed by (wertmerkmal, masseinheit).
+# `scale` multiplies the raw value into the stated `unit` (Berechnungs-/Belegungstage are "in 1000").
+source_indicators:
+  - id: hospitals
+    wertmerkmal: "Krankenhäuser insgesamt"
+    masseinheit: "Anzahl"
+    unit: "count"
+    scale: 1
+  - id: beds
+    wertmerkmal: "Krankenhäuser aufgestellte Betten insgesamt"
+    masseinheit: "Anzahl"
+    unit: "count"
+    scale: 1
+  - id: cases
+    wertmerkmal: "Patientenbewegung Fallzahl"
+    masseinheit: "Anzahl"
+    unit: "count"
+    scale: 1
+  - id: bed_days
+    wertmerkmal: "Patientenbewegung Berechnungs-/ Belegungstage"
+    masseinheit: "in 1000"
+    unit: "days"
+    scale: 1000
+  # Destatis-published derived values — kept for validation (recomputed vs published).
+  - id: alos_published
+    wertmerkmal: "Patientenbewegung durchschnittliche Verweildauer"
+    masseinheit: "in Tagen"
+    unit: "days"
+    scale: 1
+  - id: occupancy_published
+    wertmerkmal: "Patientenbewegung durchschnittliche Bettenauslastung"
+    masseinheit: "in Prozent"
+    unit: "percent"
+    scale: 1
+  - id: beds_per_100k_published
+    wertmerkmal: "Krankenhäuser aufgestellte Betten insgesamt"
+    masseinheit: "je 100 000 Einwohner"
+    unit: "per_100k"
+    scale: 1
+  - id: cases_per_100k_published
+    wertmerkmal: "Patientenbewegung Fallzahl"
+    masseinheit: "je 100 000 Einwohner"
+    unit: "per_100k"
+    scale: 1
+
+# Population denominator (per-100k). Tokenless: recovered from the Destatis-published
+# per-100k in the same report (population = count / per_100k * 1e5) — this IS the
+# Durchschnittsbevölkerung Destatis used, cross-checked across beds and cases.
+# An independent pull from statistic 12411 is the GENESIS-token enhancement (see PLAN §6).
+population:
+  method: "implied_from_published_per_100k"
+  note: >-
+    population_avg is recovered from Destatis's published "je 100 000 Einwohner" rates in
+    csv-23111-01. It equals the annual-average population (Durchschnittsbevölkerung) Destatis
+    used. Independent statistic-12411 extraction requires a GENESIS token and is additive.
+
+# Destatis special value symbols — never silently coerced to 0 (see transform/clean.py).
+special_symbols:
+  "-": "nil (genuine zero / nothing to report)"
+  ".": "no data / not available"
+  "...": "no data / not available"
+  "…": "no data / not available"
+  "x": "not applicable (cell blocked)"
+  "/": "no figure because not reliable enough"

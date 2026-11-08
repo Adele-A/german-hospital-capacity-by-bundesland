@@ -35,6 +35,32 @@ Plan reviewed and approved. Methodological defaults accepted.
 - **Decision:** `data/` is gitignored except `data/raw/MANIFEST.json` (source URL / table code,
   download timestamp, sha256, license). Download is idempotent.
 
+## 2026-11-09 — Stage 2 source finalisation (verified against downloaded files)
+
+## D6 — Exact source: csv-23111-01 of the Statistischer Bericht XLSX
+- **Decision:** parse the machine-readable sheet **`csv-23111-01`** (tidy long format:
+  `Gebiet | Wertmerkmal | Jahr | Masseinheit | Wert`) from the Destatis *Statistischer Bericht –
+  Grunddaten der Krankenhäuser* XLSX. Each value is keyed by **(Wertmerkmal, Masseinheit)**.
+- **Verified URLs (HTTP 200, real XLSX):** 2024 `…247005`, 2023 `…237005`, 2022 `…227005`
+  (see `config/sources.yaml` / `MANIFEST.json`). bed_days come as "in 1000" → scaled ×1000.
+
+## D7 — By-Land years = 2022 / 2023 / 2024 (tokenless); 2019 deferred
+- **Finding:** `csv-23111-01` carries the 16 Länder **only for the report's own reporting year**;
+  earlier years in the sheet are **Deutschland-only**. So each report supplies one by-Land year.
+- **Decision:** by-Land analytical years = **2022, 2023, 2024** (three comparable years, all 16
+  Länder, one format, tokenless). The Deutschland national series (2000–2024, incl. the pre-COVID
+  2019 baseline) is taken from the primary report for pandemic context.
+- **2019 by Land deviates from the original plan** (was 2019/2022/2024): the 2019 Fachserie is only
+  in the Statistische Bibliothek (currently unreachable here) or GENESIS (needs a token). Adding
+  2019–2021 by Land is the **GENESIS-token enhancement** — additive, no rework.
+
+## D8 — 2022 report labelling quirk handled by Land-sum verification
+- **Finding:** the 2022 report's `csv-23111-01` has a quirky layout (constant `Jahr=2022`, a
+  `Merkmal_1` carrying year-like labels, and a Deutschland row that is actually the prior year).
+- **Decision:** rely only on the **16 Land rows** (year := report year) and take the Deutschland
+  total from the **primary national series**. Verified: **sum(16 Länder) == Germany total to
+  0.0000%** for hospitals/beds/cases/bed-days in every year — so the Land values are correct.
+
 ## D5 — Cross-platform
 - **Decision:** `pathlib.Path` only, explicit utf-8, Unicode **NFC** normalisation for umlauts
   (with a round-trip test). Wheels-only deps. `.gitattributes eol=lf`. One entry point
