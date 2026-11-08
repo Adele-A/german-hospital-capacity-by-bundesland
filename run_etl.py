@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 
-from etl import config, extract, paths, transform, warehouse
+from etl import config, extract, paths, transform, validate, warehouse
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -65,13 +65,25 @@ def stage_transform() -> None:
         print(f"[transform] {t}: {n} rows")
 
 
+def stage_validate() -> None:
+    """Stage 4 — run data-quality checks and write reports/validation_report.md."""
+    con = warehouse.connect()
+    try:
+        result = validate.run_validation(con)
+    finally:
+        con.close()
+    passed = sum(c["passed"] for c in result.checks)
+    print(f"[validate] {passed}/{len(result.checks)} checks passed -> reports/validation_report.md")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     paths.ensure_dirs()
     print(f"[run_etl] by-Land years={args.years}")
     stage_extract(skip_download=args.skip_download, force_download=args.force_download)
     stage_transform()
-    # Later stages (validate -> export) are wired in as the project progresses.
+    stage_validate()
+    # Later stages (export) are wired in as the project progresses.
     return 0
 
 

@@ -35,41 +35,63 @@ def _sha256(path) -> str:
     return h.hexdigest()
 
 
+def _existing_download_times() -> dict[str, str]:
+    """Preserve the original download timestamp across reuse so MANIFEST stays deterministic."""
+    if not MANIFEST_PATH.exists():
+        return {}
+    try:
+        return {
+            e["filename"]: e["downloaded_at_utc"]
+            for e in json.loads(MANIFEST_PATH.read_text("utf-8"))
+        }
+    except json.JSONDecodeError, KeyError:
+        return {}
+
+
 def download_reports(*, force: bool = False) -> list[dict]:
-    """Download every configured report into data/raw (idempotent) and (re)write MANIFEST.json."""
+    """Download every configured report into data/raw (idempotent) and (re)write MANIFEST.json.
+
+    The written MANIFEST is deterministic given the files: `downloaded_at_utc` is preserved on
+    reuse, and the transient `action` is returned for logging only (not persisted).
+    """
     ensure_dirs()
     lic = config.license_info()
-    manifest: list[dict] = []
+    prior_times = _existing_download_times()
+    entries: list[dict] = []
+    returned: list[dict] = []
     for rep in config.reports():
         dest = RAW_DIR / rep.filename
         if dest.exists() and not force:
             action = "reused"
+            downloaded_at = prior_times.get(rep.filename) or datetime.now(UTC).isoformat(
+                timespec="seconds"
+            )
         else:
             resp = requests.get(rep.url, headers={"User-Agent": USER_AGENT}, timeout=_TIMEOUT)
             resp.raise_for_status()
-            if not resp.content[:4] == b"PK\x03\x04":
+            if resp.content[:4] != b"PK\x03\x04":
                 raise ValueError(f"{rep.url} did not return an XLSX (bad magic bytes).")
             dest.write_bytes(resp.content)
             action = "downloaded"
-        manifest.append(
-            {
-                "filename": rep.filename,
-                "url": rep.url,
-                "statistic_code": config.load_config()["statistic"]["code"],
-                "report_year": rep.report_year,
-                "role": rep.role,
-                "series_sheet": rep.series_sheet,
-                "sha256": _sha256(dest),
-                "size_bytes": dest.stat().st_size,
-                "downloaded_at_utc": datetime.now(UTC).isoformat(timespec="seconds"),
-                "action": action,
-                "license": lic,
-            }
-        )
+            downloaded_at = datetime.now(UTC).isoformat(timespec="seconds")
+        entry = {
+            "filename": rep.filename,
+            "url": rep.url,
+            "statistic_code": config.load_config()["statistic"]["code"],
+            "report_year": rep.report_year,
+            "role": rep.role,
+            "series_sheet": rep.series_sheet,
+            "sha256": _sha256(dest),
+            "size_bytes": dest.stat().st_size,
+            "downloaded_at_utc": downloaded_at,
+            "license": lic,
+        }
+        entries.append(entry)
+        returned.append({**entry, "action": action})
     MANIFEST_PATH.write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(entries, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
-    return manifest
+    return returned
 
 
 def _read_sheet_rows(path, sheet: str) -> tuple[list[str], list[list]]:
