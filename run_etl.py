@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 
-from etl import config, extract, paths, warehouse
+from etl import config, extract, paths, transform, warehouse
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -54,12 +54,24 @@ def stage_extract(*, skip_download: bool, force_download: bool) -> None:
     print(f"[extract] raw_source_long: {n} rows loaded into {paths.DUCKDB_PATH.name}")
 
 
+def stage_transform() -> None:
+    """Stage 3 — build staging, dimensions and the mart (derived indicators)."""
+    con = warehouse.connect()
+    try:
+        counts = transform.run_transform(con)
+    finally:
+        con.close()
+    for t, n in counts.items():
+        print(f"[transform] {t}: {n} rows")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     paths.ensure_dirs()
     print(f"[run_etl] by-Land years={args.years}")
     stage_extract(skip_download=args.skip_download, force_download=args.force_download)
-    # Later stages (transform -> validate -> export) are wired in as the project progresses.
+    stage_transform()
+    # Later stages (validate -> export) are wired in as the project progresses.
     return 0
 
 
