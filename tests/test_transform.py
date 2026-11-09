@@ -92,6 +92,36 @@ def test_fact_indicators_has_source_and_derived():
     } <= got  # derived
 
 
+def test_germany_series_wide_from_long(monkeypatch):
+    """build_germany_series pivots the DG long series to a wide national table."""
+    long = pd.DataFrame(
+        [
+            {"year": y, "indicator_id": ind, "value": v}
+            for y in (2019, 2024)
+            for ind, v in {
+                "hospitals": 1900.0,
+                "beds": 480000.0,
+                "cases": 1.9e7,
+                "bed_days": 1.2e8,
+                "beds_per_100k_published": 580.0,
+                "cases_per_100k_published": 23000.0,
+                "alos_published": 6.3,
+                "occupancy_published": 70.0,
+            }.items()
+        ]
+    )
+    monkeypatch.setattr(transform.extract, "build_germany_series", lambda: long)
+    con = duckdb.connect(":memory:")
+    n = transform.build_germany_series(con)
+    df = con.cursor().execute("SELECT * FROM fact_germany_series ORDER BY year").df()
+    con.close()
+    assert n == 2
+    assert list(df["year"]) == [2019, 2024]
+    # population_avg recovered from published per-100k: 480000 / 580 * 1e5
+    assert df.loc[0, "population_avg"] == pytest.approx(480000 / 580 * 100000)
+    assert df.loc[0, "beds_per_100k"] == 580.0 and df.loc[0, "alos"] == 6.3
+
+
 def test_dims_built_without_network():
     con = duckdb.connect(":memory:")
     transform.build_dims(con)

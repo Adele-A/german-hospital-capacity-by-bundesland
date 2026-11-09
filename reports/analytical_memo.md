@@ -33,15 +33,21 @@ from **68.6% to 77.8%** (national **72.0%**). Capacity differs far more between 
 intensity with which beds are used — consistent with length of stay being driven mainly by
 case-mix and clinical practice rather than by regional bed supply.
 
-## 3. Trends 2022–2024: fewer hospitals, recovering caseload, rising occupancy
+## 3. Trends 2022–2024, and the pandemic in national context
 
 At the national level the number of hospitals fell from **1,893 (2022) to 1,841 (2024)** (−2.7%)
 and available beds from **480,382 to 472,851** (−1.6%), while **inpatient cases rose from 16.80 to
 17.55 million** as activity recovered from the COVID-19 trough. The combination — fewer beds, more
 cases — lifted **bed occupancy from 69.0% to 72.0%** and nudged beds per 100k down from 582 to 566.
-Two cautions on the trend: the pandemic depressed 2020–2022 case counts (so 2022→2024 partly
-reflects recovery, not new demand), and the **population denominator changed basis after Zensus
-2022**, which affects per-100k comparisons across that boundary.
+
+The by-Land figures start in 2022, so the pandemic itself is read from the **Germany national
+series 2000–2024** (`dashboard/data/fact_germany_series.csv`, figure
+`reports/figures/national_trend.png`). Inpatient cases peaked at **19.42 million in 2019**, fell
+**13.8% to the 2021 trough (16.74 million)**, and had **only partly recovered by 2024 (17.55
+million — still 9.6% below the 2019 baseline)**. Meanwhile available beds declined steadily
+throughout (≈560k in 2000 → 473k in 2024), independent of the pandemic. So the 2022→2024 rise is
+recovery toward, not past, pre-COVID activity. Note too the **population denominator changed basis
+after Zensus 2022**, which affects per-100k comparisons across that boundary.
 
 ## 4. Berlin–Brandenburg: why the pair must be read together
 

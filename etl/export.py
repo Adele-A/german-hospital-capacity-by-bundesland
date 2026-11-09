@@ -13,6 +13,7 @@ from etl.paths import DASHBOARD_DATA_DIR
 EXPORT_TABLES = [
     "fact_indicators",
     "fact_indicators_wide",
+    "fact_germany_series",
     "dim_bundesland",
     "dim_indicator",
     "dim_year",

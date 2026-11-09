@@ -38,6 +38,9 @@ def _con() -> duckdb.DuckDBPyConnection:
     )
     warehouse.write_table(con, "dim_indicator", pd.DataFrame([{"indicator_id": "beds"}]))
     warehouse.write_table(con, "dim_year", pd.DataFrame([{"year": 2024}]))
+    warehouse.write_table(
+        con, "fact_germany_series", pd.DataFrame([{"year": 2024, "beds": 472851.0}])
+    )
     return con
 
 

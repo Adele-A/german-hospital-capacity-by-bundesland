@@ -106,4 +106,31 @@ def build_figures(con: duckdb.DuckDBPyConnection, year: int = 2024) -> list[str]
     plt.close(fig)
     out.append(str(p))
 
+    # 4) National pandemic context — Deutschland cases & beds, 2000-2024 (pre-COVID baseline)
+    nat = (
+        con.cursor().execute("SELECT year, cases, beds FROM fact_germany_series ORDER BY year").df()
+    )
+    fig, ax1 = plt.subplots(figsize=(7, 5))
+    ax1.plot(nat["year"], nat["cases"] / 1e6, color=ACCENT, lw=2, marker="o", label="Cases (M)")
+    ax1.set_xlabel("Year")
+    ax1.set_ylabel("Inpatient cases (millions)", color=ACCENT)
+    ax1.axvspan(2019.5, 2021.5, color="#f4a26133", label="COVID-19")
+    ax1.axvline(2019, color="#888", ls=":", lw=1)
+    ax1.annotate(
+        "2019 pre-COVID",
+        (2019, nat.loc[nat.year == 2019, "cases"].iloc[0] / 1e6),
+        textcoords="offset points",
+        xytext=(-6, 8),
+        ha="right",
+        fontsize=8,
+    )
+    ax2 = ax1.twinx()
+    ax2.plot(nat["year"], nat["beds"] / 1e3, color="#b5651d", lw=1.8, ls="--", label="Beds (k)")
+    ax2.set_ylabel("Available beds (thousands)", color="#b5651d")
+    ax1.set_title("Germany: inpatient cases & beds, 2000–2024")
+    p = FIGURES_DIR / "national_trend.png"
+    fig.savefig(p)
+    plt.close(fig)
+    out.append(str(p))
+
     return out

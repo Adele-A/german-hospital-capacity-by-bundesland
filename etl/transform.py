@@ -73,9 +73,35 @@ def build_mart(con: duckdb.DuckDBPyConnection) -> None:
     warehouse.run_script(con, (SQL_DIR / "mart.sql").read_text(encoding="utf-8"))
 
 
+def build_germany_series(con: duckdb.DuckDBPyConnection) -> int:
+    """fact_germany_series: Deutschland national time series (year >= germany_series.year_min),
+    for pandemic context — it includes the pre-COVID 2019 baseline that the by-Land mart (which
+    starts in 2022) cannot show. Uses Destatis's own published national values."""
+    g = extract.build_germany_series()
+    wide = g.pivot_table(index="year", columns="indicator_id", values="value", aggfunc="first")
+    out = pd.DataFrame({"year": wide.index.astype(int)})
+    out["hospitals"] = wide["hospitals"].values
+    out["beds"] = wide["beds"].values
+    out["cases"] = wide["cases"].values
+    out["bed_days"] = wide["bed_days"].values
+    out["population_avg"] = (wide["beds"] / wide["beds_per_100k_published"] * 100000).values
+    out["beds_per_100k"] = wide["beds_per_100k_published"].values
+    out["cases_per_100k"] = wide["cases_per_100k_published"].values
+    out["alos"] = wide["alos_published"].values
+    out["occupancy"] = wide["occupancy_published"].values
+    return warehouse.write_table(con, "fact_germany_series", out.sort_values("year"))
+
+
 def run_transform(con: duckdb.DuckDBPyConnection) -> dict[str, int]:
     build_staging(con)
     build_dims(con)
     build_mart(con)
-    tables = ["stg_hospital_long", "mart_wide", "fact_indicators", "fact_indicators_wide"]
+    build_germany_series(con)
+    tables = [
+        "stg_hospital_long",
+        "mart_wide",
+        "fact_indicators",
+        "fact_indicators_wide",
+        "fact_germany_series",
+    ]
     return {t: warehouse.count(con, t) for t in tables}

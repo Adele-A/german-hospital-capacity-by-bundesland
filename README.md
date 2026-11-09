@@ -14,8 +14,9 @@ HTML preview sit on top. Independent data-analytics portfolio project.
   (Baden-Württemberg)** to **698 (Hamburg)** / **697 (Thüringen)**; national average **566**.
 - **Utilisation is far more even:** average length of stay **6.6–7.8 days**, bed occupancy
   **68.6–77.8%** (national 72.0%).
-- **2022→2024 trend:** hospitals **1,893 → 1,841** (−2.7%) and beds **−1.6%**, while inpatient
-  cases recovered to **17.5 M**, lifting occupancy from **69.0% to 72.0%**.
+- **Pandemic (national series 2000–2024):** inpatient cases peaked at **19.4 M in 2019**, fell
+  **13.8%** to the 2021 trough, and by **2024 (17.5 M) were still 9.6% below the 2019 baseline**;
+  hospitals **1,893 → 1,841** (−2.7%, 2022→2024) and occupancy rose **69.0% → 72.0%**.
 - **Berlin–Brandenburg:** Berlin shows the highest occupancy (77.8%) because its 86 hospitals treat
   patients from Brandenburg (cases are counted at the hospital's location). Read as one region they
   give **562 beds / 20,750 cases per 100k** — see [`reports/analytical_memo.md`](reports/analytical_memo.md).
@@ -122,8 +123,9 @@ Windows-only; on macOS use a Windows VM). Until then the cross-platform
 
 ## Limitations
 
-- By-Land years are **2022–2024** (tokenless); a pre-pandemic 2019 by Land needs the GENESIS token
-  or the archived Fachserie.
+- By-Land years are **2022–2024** (tokenless); the pandemic is shown at the **national** level via
+  the Germany 2000–2024 series (incl. the 2019 baseline). A pre-pandemic 2019 **by Land** needs the
+  GENESIS token or the archived Fachserie.
 - `population_avg` is Destatis's own denominator recovered from published per-100k, not an
   independent statistic-12411 pull (that is the token enhancement).
 - Cases are location-based, not residence-based; no age standardisation. Differences reflect age

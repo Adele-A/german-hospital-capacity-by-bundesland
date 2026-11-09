@@ -51,6 +51,12 @@ Columns: `ags_code`, `year`, `hospitals`, `beds`, `cases`, `bed_days`, `populati
 `beds_per_100k`, `cases_per_100k`, `alos`, `occupancy`. Convenience table; the long
 `fact_indicators` is the model's fact.
 
+## `fact_germany_series.csv` — Germany national time series (2000–2024)
+One row per year for **Deutschland only**, same measure columns as `fact_indicators_wide`
+(`hospitals`, `beds`, `cases`, `bed_days`, `population_avg`, `beds_per_100k`, `cases_per_100k`,
+`alos`, `occupancy`). Provides the pandemic context and the pre-COVID 2019 baseline that the
+by-Land mart (2022–2024) cannot show. Values are Destatis's published national figures.
+
 ## `geo/bundeslaender.topojson`
 Simplified state boundaries (BKG **VG2500**, licence dl-de/by-2-0), key **`ags_code`** matching
 `dim_bundesland`. For the Power BI Shape Map. WGS84 (EPSG:4326).
